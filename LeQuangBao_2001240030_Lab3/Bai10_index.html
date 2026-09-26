@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+        }
+        button {
+            padding: 10px;
+        }
+        ul {
+            padding: 0;
+            margin-top: 20px;
+            width: 80%;
+        }
+        li {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        li input[type="checkbox"] {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>To-do List</h2>
+    <input type="text" id="task" placeholder="Nhập công việc...">
+    <button onclick="addTask()">Thêm</button>
+    <ul id="taskList"></ul>
+    <script>
+        function loadTasks(){
+            fetch("Bai10_todo.php").then(res=>res.json()).then(data=>{
+                todos=data;
+                render();
+            });
+        }
+
+        function render(){
+            let html='';
+            todos.forEach((t, index)=>{
+                let checked= t.completed?'checked':'';
+                let textStyle = t.completed ? 'text-decoration: line-through;' : '';
+                html +=`
+                <li>
+                    <input type="checkbox" ${checked} onchange="toggleTask(${index})">
+                    <span style="${textStyle}">${t.task}</span>
+                    <button onclick="deleteTask(${index})">Xóa</button>
+                </li>`;
+            });
+            document.getElementById('taskList').innerHTML=html;
+        }
+
+        function saveTasks(){
+            fetch('Bai10_todo.php',{method:'POST', headers:{'Content-Type': 'application/json'},
+            body: JSON.stringify(todos)}).then(()=>render());
+        }
+
+        function addTask(){
+            let val =document.getElementById('task').value;
+            if(val.trim()!==''){
+                todos.push({task:val, completed:false});
+                document.getElementById('task').value='';
+                saveTasks();
+            }
+        }
+
+        function toggleTask(index){
+            todos[index].completed=!todos[index].completed;
+            saveTasks();
+        }
+
+        function deleteTask(index){
+            todos.splice(index, 1);
+            saveTasks();
+        }
+        loadTasks();
+    </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+    
+        h3 {
+            text-align: center;
+            color: black;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    
+        th, td {
+            padding: 14px 15px;
+            text-align: left;
+            border-bottom: 1px solid white;
+        }
+    
+        th {
+            background-color: #3498db;
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+    
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+    
+        td:nth-child(2) {
+            font-weight: bold;
+            color: red;
+        }
+    
+        .update-time {
+            text-align: right;
+            font-size: 13px;
+            color: gray;
+            font-style: italic;
+        }
+    </style>
+    </head>
+    
+    <body>
+        <div class="container">
+            <h3>Tỷ giá ngoại tệ (Base: USD)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã tiền tệ</th>
+                        <th>Tỷ giá</th>
+                    </tr>
+                </thead>
+                <tbody id="rates">
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: #7f8c8d;">Đang tải dữ liệu...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="update-time">Cập nhật lần cuối: <span id="time">Đang cập nhật...</span></p>
+        </div>
+    
+        <script>
+            function loadRates() {
+                fetch('Bai11_rate.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        let html = '';
+                        let currencies = ['VND', 'EUR', 'JPY', 'GBP', 'AUD', 'KRW'];
+                        currencies.forEach(c => {
+                            if (data.rates[c]) {
+                                let formattedRate = new Intl.NumberFormat('vi-VN').format(data.rates[c]);
+                                html += `
+                                    <tr>
+                                        <td>${c}</td>
+                                        <td>${formattedRate}</td>
+                                    </tr>`;
+                            }
+                        });
+
+                        document.getElementById('rates').innerHTML = html;
+                        document.getElementById('time').innerText = new Date().toLocaleTimeString('vi-VN');
+                    })
+                    .catch(error => {
+                        document.getElementById('rates').innerHTML = `
+                            <tr>
+                                <td colspan="2" style="text-align: center; color: #e74c3c;">Lỗi tải dữ liệu! Vui lòng kiểm tra lại.</td>
+                            </tr>`;
+                    });
+            }
+            loadRates();
+            setInterval(loadRates, 600000);
+        </script>
+</body>
+</html>
